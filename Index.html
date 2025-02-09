@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Face Recognition & Image Generation</title>
+
+    <!-- Load AI Models -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+        .panel {
+            flex: 1;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+        .left-panel {
+            text-align: center;
+        }
+        video, img {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+        .threat-safe {
+            color: green;
+            font-weight: bold;
+        }
+        .threat-danger {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: darkblue;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AI Face Recognition & Image Generation</h1>
+    <div class="container">
+        <!-- Left Panel: Live Camera & AI Generated Image -->
+        <div class="panel left-panel">
+            <h2>Live Camera</h2>
+            <video id="video" autoplay></video>
+            <img id="generated-image" src="" alt="AI Generated Face" style="display:none;">
+            <button id="scan-button">Start Scanning</button>
+        </div>
+
+        <!-- Right Panel: Identity & Threat Detection -->
+        <div class="panel right-panel">
+            <h2>Identified Person</h2>
+            <p><b>Name:</b> <span id="name">Waiting for scan...</span></p>
+            <p><b>Age:</b> <span id="age">--</span></p>
+            <p><b>ID:</b> <span id="id_number">--</span></p>
+            <p><b>Threat Level:</b> <span id="threat-level" class="threat-safe">--</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Sample Database for Testing (Simulating AI Image Generation)
+        const sampleDatabase = {
+            "1234": { 
+                name: "John Doe", 
+                age: 34, 
+                id: "ID-56789", 
+                threat: "Safe", 
+                image: "https://i.pravatar.cc/300?img=5"  // AI generated face placeholder
+            },
+            "5678": { 
+                name: "Alex Smith", 
+                age: 45, 
+                id: "ID-98765", 
+                threat: "High", 
+                image: "https://i.pravatar.cc/300?img=10"  // AI generated face placeholder
+            }
+        };
+
+        const video = document.getElementById('video');
+        const scanButton = document.getElementById('scan-button');
+        const nameDisplay = document.getElementById('name');
+        const ageDisplay = document.getElementById('age');
+        const idDisplay = document.getElementById('id_number');
+        const threatDisplay = document.getElementById('threat-level');
+        const faceImage = document.getElementById('generated-image');
+
+        // Load Face API Models
+        async function loadModels() {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
+            console.log("AI Models Loaded!");
+        }
+
+        // Start Camera
+        async function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => video.srcObject = stream)
+                .catch(err => console.error("Error accessing webcam:", err));
+        }
+
+        // Scan Face and Identify (Triggered by Button)
+        async function scanFace() {
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
+
+            if (detections.length > 0) {
+                console.log("Face Detected!");
+
+                // Simulated Face ID (Random Selection from Sample Data)
+                const faceID = detections.length % 2 === 0 ? "1234" : "5678";
+                const person = sampleDatabase[faceID];
+
+                if (person) {
+                    // Hide live video and show AI-generated face
+                    video.style.display = "none";
+                    faceImage.src = person.image;
+                    faceImage.style.display = "block";
+
+                    // Display Identified Person's Credentials
+                    nameDisplay.innerText = person.name;
+                    ageDisplay.innerText = person.age;
+                    idDisplay.innerText = person.id;
+                    threatDisplay.innerText = person.threat;
+                    threatDisplay.className = person.threat === "Safe" ? "threat-safe" : "threat-danger";
+                } else {
+                    nameDisplay.innerText = "Unknown Person";
+                    threatDisplay.innerText = "Warning!";
+                    threatDisplay.className = "threat-danger";
+                }
+            } else {
+                alert("No face detected. Try again.");
+            }
+        }
+
+        // Start Everything
+        loadModels().then(() => {
+            startVideo();
+        });
+
+        // Attach event listener to scan button
+        scanButton.addEventListener("click", scanFace);
+
+    </script>
+
+</body>
+</html>
