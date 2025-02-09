@@ -68,7 +68,7 @@
         <!-- Left Panel: Live Camera & AI Generated Image -->
         <div class="panel left-panel">
             <h2>Live Camera</h2>
-            <video id="video" autoplay></video>
+            <video id="video" autoplay style="display:none;"></video>
             <img id="generated-image" src="" alt="AI Generated Face" style="display:none;">
             <button id="scan-button">Start Scanning</button>
         </div>
@@ -110,6 +110,8 @@
         const threatDisplay = document.getElementById('threat-level');
         const faceImage = document.getElementById('generated-image');
 
+        let cameraStarted = false;
+
         // Load Face API Models
         async function loadModels() {
             await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js/models');
@@ -118,15 +120,26 @@
             console.log("AI Models Loaded!");
         }
 
-        // Start Camera
+        // Start Camera Only When Clicking the Button
         async function startVideo() {
-            navigator.mediaDevices.getUserMedia({ video: {} })
-                .then(stream => video.srcObject = stream)
-                .catch(err => console.error("Error accessing webcam:", err));
+            if (!cameraStarted) {
+                navigator.mediaDevices.getUserMedia({ video: {} })
+                    .then(stream => {
+                        video.srcObject = stream;
+                        video.style.display = "block"; // Show video
+                        cameraStarted = true;
+                    })
+                    .catch(err => console.error("Error accessing webcam:", err));
+            }
         }
 
         // Scan Face and Identify (Triggered by Button)
         async function scanFace() {
+            if (!cameraStarted) {
+                alert("Please allow camera access first!");
+                return;
+            }
+
             const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
 
             if (detections.length > 0) {
@@ -158,13 +171,17 @@
             }
         }
 
-        // Start Everything
-        loadModels().then(() => {
-            startVideo();
-        });
+        // Start Face API Models
+        loadModels();
 
         // Attach event listener to scan button
-        scanButton.addEventListener("click", scanFace);
+        scanButton.addEventListener("click", async () => {
+            if (!cameraStarted) {
+                await startVideo(); // Open camera when clicked
+            } else {
+                await scanFace(); // Start scanning if camera is already on
+            }
+        });
 
     </script>
 
