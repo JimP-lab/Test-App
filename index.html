@@ -34,7 +34,7 @@
         }
         video, img {
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             border-radius: 10px;
             border: 2px solid #ddd;
         }
@@ -69,8 +69,13 @@
         <div class="panel left-panel">
             <h2>Live Camera</h2>
             <video id="video" autoplay style="display:none;"></video>
-            <img id="generated-image" src="" alt="AI Generated Face" style="display:none;">
             <button id="scan-button">Start Scanning</button>
+        </div>
+
+        <!-- Middle Panel: AI-Generated Image -->
+        <div class="panel left-panel">
+            <h2>AI-Generated Person</h2>
+            <img id="generated-image" src="" alt="AI Generated Face" style="display:none;">
         </div>
 
         <!-- Right Panel: Identity & Threat Detection -->
