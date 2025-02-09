@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Face Recognition & Image Generation</title>
+    <title>AI Face Generation & Identifier</title>
 
     <!-- Load AI Models -->
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -63,18 +63,19 @@
 </head>
 <body>
 
-    <h1>AI Face Recognition & Image Generation</h1>
+    <h1>AI Face Generation & Identifier</h1>
     <div class="container">
-        <!-- Left Panel: Live Camera & AI Generated Image -->
+        <!-- Left Panel: Live Camera -->
         <div class="panel left-panel">
             <h2>Live Camera</h2>
             <video id="video" autoplay style="display:none;"></video>
             <button id="scan-button">Start Scanning</button>
         </div>
 
-        <!-- Middle Panel: AI-Generated Image -->
+        <!-- Middle Panel: AI-Generated Person -->
         <div class="panel left-panel">
             <h2>AI-Generated Person</h2>
+            <canvas id="captured-face" style="display:none;"></canvas>
             <img id="generated-image" src="" alt="AI Generated Face" style="display:none;">
         </div>
 
@@ -89,31 +90,15 @@
     </div>
 
     <script>
-        // Sample Database for Testing (Simulating AI Image Generation)
-        const sampleDatabase = {
-            "1234": { 
-                name: "John Doe", 
-                age: 34, 
-                id: "ID-56789", 
-                threat: "Safe", 
-                image: "https://i.pravatar.cc/300?img=5"  // AI generated face placeholder
-            },
-            "5678": { 
-                name: "Alex Smith", 
-                age: 45, 
-                id: "ID-98765", 
-                threat: "High", 
-                image: "https://i.pravatar.cc/300?img=10"  // AI generated face placeholder
-            }
-        };
-
         const video = document.getElementById('video');
         const scanButton = document.getElementById('scan-button');
         const nameDisplay = document.getElementById('name');
         const ageDisplay = document.getElementById('age');
         const idDisplay = document.getElementById('id_number');
         const threatDisplay = document.getElementById('threat-level');
-        const faceImage = document.getElementById('generated-image');
+        const generatedImage = document.getElementById('generated-image');
+        const capturedCanvas = document.getElementById('captured-face');
+        const ctx = capturedCanvas.getContext('2d');
 
         let cameraStarted = false;
 
@@ -138,6 +123,24 @@
             }
         }
 
+        // Capture Face from Camera
+        async function captureFace() {
+            capturedCanvas.width = video.videoWidth;
+            capturedCanvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, capturedCanvas.width, capturedCanvas.height);
+            return capturedCanvas.toDataURL(); // Convert to image data URL
+        }
+
+        // Generate AI Image from Captured Face (Simulated)
+        async function generateAIImage(imageData) {
+            console.log("Generating AI Image from Captured Face...");
+            
+            // Here, normally an API call like OpenAI's DALL·E would be used
+            // For now, let's use a test placeholder instead
+            generatedImage.src = imageData; // Simulated output
+            generatedImage.style.display = "block";
+        }
+
         // Scan Face and Identify (Triggered by Button)
         async function scanFace() {
             if (!cameraStarted) {
@@ -150,27 +153,19 @@
             if (detections.length > 0) {
                 console.log("Face Detected!");
 
-                // Simulated Face ID (Random Selection from Sample Data)
-                const faceID = detections.length % 2 === 0 ? "1234" : "5678";
-                const person = sampleDatabase[faceID];
+                // Capture face image from camera
+                const capturedImage = await captureFace();
 
-                if (person) {
-                    // Hide live video and show AI-generated face
-                    video.style.display = "none";
-                    faceImage.src = person.image;
-                    faceImage.style.display = "block";
+                // Simulate AI image generation
+                await generateAIImage(capturedImage);
 
-                    // Display Identified Person's Credentials
-                    nameDisplay.innerText = person.name;
-                    ageDisplay.innerText = person.age;
-                    idDisplay.innerText = person.id;
-                    threatDisplay.innerText = person.threat;
-                    threatDisplay.className = person.threat === "Safe" ? "threat-safe" : "threat-danger";
-                } else {
-                    nameDisplay.innerText = "Unknown Person";
-                    threatDisplay.innerText = "Warning!";
-                    threatDisplay.className = "threat-danger";
-                }
+                // Simulated Identity Recognition
+                nameDisplay.innerText = "Person Identified";
+                ageDisplay.innerText = "Unknown";
+                idDisplay.innerText = "Scanning...";
+                threatDisplay.innerText = "Safe";
+                threatDisplay.className = "threat-safe";
+
             } else {
                 alert("No face detected. Try again.");
             }
