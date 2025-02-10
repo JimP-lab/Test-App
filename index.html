@@ -117,6 +117,7 @@
                         video.srcObject = stream;
                         video.style.display = "block"; // Show video
                         cameraStarted = true;
+                        scanButton.innerText = "Scan Face"; // Change button text
                     })
                     .catch(err => console.error("Error accessing webcam:", err));
             }
