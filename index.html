@@ -130,14 +130,15 @@
             return capturedCanvas.toDataURL(); // Convert to image data URL
         }
 
-        // Generate AI Image from Captured Face (Simulated)
-        async function generateAIImage(imageData) {
-            console.log("Generating AI Image from Captured Face...");
-            
-            // Here, normally an API call like OpenAI's DALL·E would be used
-            // For now, let's use a test placeholder instead
-            generatedImage.src = imageData; // Simulated output
-            generatedImage.style.display = "block";
+        // Fetch personal information based on face detection (Simulation)
+        async function fetchPersonalInfo() {
+            // This is a simulated function. You need to replace it with actual API calls to fetch real data.
+            return {
+                name: "John Doe",
+                age: 30,
+                id_number: "ABC123456",
+                threat_level: "Safe"
+            };
         }
 
         // Scan Face and Identify (Triggered by Button)
@@ -158,12 +159,15 @@
                 // Simulate AI image generation
                 await generateAIImage(capturedImage);
 
-                // Simulated Identity Recognition
-                nameDisplay.innerText = "Person Identified";
-                ageDisplay.innerText = "Unknown";
-                idDisplay.innerText = "Scanning...";
-                threatDisplay.innerText = "Safe";
-                threatDisplay.className = "threat-safe";
+                // Fetch personal information
+                const personalInfo = await fetchPersonalInfo();
+
+                // Update UI with personal information
+                nameDisplay.innerText = personalInfo.name;
+                ageDisplay.innerText = personalInfo.age;
+                idDisplay.innerText = personalInfo.id_number;
+                threatDisplay.innerText = personalInfo.threat_level;
+                threatDisplay.className = personalInfo.threat_level === "Safe" ? "threat-safe" : "threat-danger";
 
             } else {
                 alert("No face detected. Try again.");
